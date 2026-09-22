@@ -62,6 +62,7 @@ GitHub Actions, systemd, rootless Podman, monitoring, analytics, operational das
 [![Fedora](https://img.shields.io/badge/Fedora-51A2DA?style=for-the-badge&logo=fedora&logoColor=white)](https://fedoraproject.org/)
 
 [![Windows Server](https://img.shields.io/badge/Windows-Server-0078D4?style=for-the-badge&logo=windows&logoColor=white)](https://www.microsoft.com/windows-server)
+[![macOS](https://img.shields.io/badge/macOS-000000?style=for-the-badge&logo=apple&logoColor=white)](https://www.apple.com/macos/)
 [![Microsoft 365](https://img.shields.io/badge/Microsoft-365-D83B01?style=for-the-badge&logo=microsoft365&logoColor=white)](https://www.microsoft.com/microsoft-365)
 [![PowerShell](https://img.shields.io/badge/PowerShell-5391FE?style=for-the-badge&logo=powershell&logoColor=white)](https://learn.microsoft.com/powershell/)
 
@@ -78,25 +79,59 @@ GitHub Actions, systemd, rootless Podman, monitoring, analytics, operational das
 
 Nexus is built around a simple principle: operational systems should be understandable by the people who maintain them.
 
+The public utilities and OCI experimentation images below are intentionally separate from private deployment configuration and operational topology.
+
 ## Projects &amp; Platforms
 
 <table>
 <tr>
-<td valign="top">
+<td width="33%" valign="top">
 
-### Engineering in progress
+### [Northstar Guard](https://github.com/Blue-Ridge-Systems-Consulting/northstar-guard-public)
 
-Blue Ridge Systems Consulting is consolidating its infrastructure, automation, security, tooling, and selected open-source engineering projects under this organization. Public repositories and tooling will appear here as they are released.
+**Local-first security monitoring** for macOS, Fedora COSMIC, headless Linux, and Windows. Northstar Guard explains focused findings and leaves remediation decisions with the operator.
+
+[Explore Northstar Guard →](https://github.com/Blue-Ridge-Systems-Consulting/northstar-guard-public)
+
+</td>
+<td width="33%" valign="top">
+
+### [Windows Maintenance](https://github.com/Blue-Ridge-Systems-Consulting/blue-ridge-windows-maintenance)
+
+**Inspectable PowerShell operations tooling** for diagnostics, cautious maintenance, domain and server health, and security checks—built around diagnose, repair, then verify.
+
+[Explore the toolkit →](https://github.com/Blue-Ridge-Systems-Consulting/blue-ridge-windows-maintenance)
+
+</td>
+<td width="33%" valign="top">
+
+### [Raspberry Pi 5 Utilities](https://github.com/Blue-Ridge-Systems-Consulting/raspberry-pi-5)
+
+**Linux and ARM utility scripts** for lightweight malware scanning with systemd scheduling and persistent USB NIC names on small infrastructure hosts.
+
+[Explore the utilities →](https://github.com/Blue-Ridge-Systems-Consulting/raspberry-pi-5)
 
 </td>
 </tr>
 </table>
 
-<sub>Repository cards and project highlights will live here as public work becomes available.</sub>
+The organization also publishes focused [macOS tuning scripts](https://github.com/Blue-Ridge-Systems-Consulting/MacOS-Scripts) that save a before-state and restore path before changing system preferences.
+
+## Containers &amp; Packages
+
+Public OCI images for AI experimentation, exploration, local prototyping, and learning are cataloged in [Blue Ridge Systems Container Images](https://github.com/Blue-Ridge-Systems-Consulting/blue-ridge-container-images). The current public packages use the `blue-ridge-public` tag; review the catalog and upstream licenses before use.
+
+| Image | Public GHCR identifier | Purpose &amp; documentation |
+| --- | --- | --- |
+| [`reo-ai`](https://github.com/orgs/Blue-Ridge-Systems-Consulting/packages/container/package/reo-ai) | `ghcr.io/blue-ridge-systems-consulting/reo-ai:blue-ridge-public` | General-use OCI catalog image for AI experimentation and local prototyping. |
+| [`reo-tools`](https://github.com/orgs/Blue-Ridge-Systems-Consulting/packages/container/package/reo-tools) | `ghcr.io/blue-ridge-systems-consulting/reo-tools:blue-ridge-public` | General-use OCI catalog image for experimentation and exploration. |
+| [`olmoai`](https://github.com/orgs/Blue-Ridge-Systems-Consulting/packages/container/package/olmoai) | `ghcr.io/blue-ridge-systems-consulting/olmoai:blue-ridge-public` | General-use OCI catalog image for AI experimentation and learning. |
+
+See the [container catalog](https://github.com/Blue-Ridge-Systems-Consulting/blue-ridge-container-images) for usage guidance and responsible-use boundaries.
 
 ## Open Source &amp; Public Engineering
 
-Selected tools, automation, container images, infrastructure examples, and other engineering work may be published here when they are ready to be useful, maintainable, and responsibly shared.
+Blue Ridge publishes focused utilities, monitor-only safety tooling, and container starting points that can be inspected and used responsibly. Public repositories document their own scope, safeguards, and support boundaries; private deployment configuration, credentials, and operational details remain private.
 
 ## Founded by [Ray Owens](https://github.com/owensreo)
 
