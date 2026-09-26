@@ -65,4 +65,4 @@ Live pilots:
 - Organization repository: `Blue-Ridge-Systems-Consulting/blue-ridge-container-images#4` was assigned to `owensreo`, added to Project #2, set to `Done`, and dated `2026-09-26`. Replays reused item `PVTI_lAHOCt4J584BgNnLzg83xkA`.
 - Personal repository: existing item `PVTI_lAHOCt4J584BgNskzg2WI6w` for `owensreo/tailscale-policy#40` was assigned to `owensreo`, set to `Foundation Complete`, and dated `2026-08-19` without creating a duplicate.
 
-Scheduled writes remain disabled until the documented Actions secret and enable variable are configured after the implementation PR is merged.
+Scheduled writes remain disabled until the documented Actions secret and tracked activation PR are merged.

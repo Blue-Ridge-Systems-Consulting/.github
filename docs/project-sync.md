@@ -38,9 +38,9 @@ Do not reuse an interactive admin token. Do not grant `admin:org`, `workflow`, p
 Writes are fail-closed behind both controls:
 
 - Actions secret `BLUE_RIDGE_PROJECT_SYNC_TOKEN`
-- repository Actions variable `BLUE_RIDGE_PROJECT_SYNC_ENABLED=true`
+- tracked `.github/project-sync/activation.json` with `scheduled_writes_enabled: true`
 
-Manual dispatch defaults to dry-run. Keep the variable absent or `false` while reviewing dry-run routing. Then select one merged PR, dispatch with `write=true`, verify the assignment/status/date, and dispatch the same PR again to prove `update-existing` instead of duplicate creation. Only then retain the enable variable for scheduled runs.
+Manual dispatch defaults to dry-run. Keep the activation file absent or set its value to `false` while reviewing dry-run routing. Then select one merged PR, dispatch with `write=true`, verify the assignment/status/date, and dispatch the same PR again to prove `update-existing` instead of duplicate creation. Enabling or disabling scheduled writes is a normal reviewed PR change.
 
 The schedule runs at minutes 17 and 47 and searches the prior two hours, intentionally overlapping runs. Idempotent lookup makes overlap safe and covers delayed workflow starts.
 
