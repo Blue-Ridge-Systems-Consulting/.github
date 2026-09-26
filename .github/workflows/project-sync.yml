@@ -1,0 +1,73 @@
+name: Blue Ridge Project Sync
+
+on:
+  schedule:
+    - cron: "17,47 * * * *"
+  workflow_dispatch:
+    inputs:
+      repository:
+        description: "Optional exact OWNER/REPOSITORY"
+        required: false
+        type: string
+      pr:
+        description: "Optional merged pull request number"
+        required: false
+        type: number
+      write:
+        description: "Apply writes (requires enable variable and secret)"
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+concurrency:
+  group: blue-ridge-project-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    if: ${{ github.event_name == 'workflow_dispatch' || vars.BLUE_RIDGE_PROJECT_SYNC_ENABLED == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      GH_TOKEN: ${{ secrets.BLUE_RIDGE_PROJECT_SYNC_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate authentication
+        shell: bash
+        run: |
+          if [[ -z "${GH_TOKEN:-}" ]]; then
+            echo "BLUE_RIDGE_PROJECT_SYNC_TOKEN is not configured." >&2
+            exit 1
+          fi
+          gh api user --jq '.login'
+          gh api users/owensreo/projectsV2 --jq 'length'
+          gh api orgs/Blue-Ridge-Systems-Consulting/projectsV2 --jq 'length'
+
+      - name: Validate write gate
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.write && vars.BLUE_RIDGE_PROJECT_SYNC_ENABLED != 'true' }}
+        shell: bash
+        run: |
+          echo "Project Sync writes are disabled. Set BLUE_RIDGE_PROJECT_SYNC_ENABLED=true only after the pilot and idempotency checks." >&2
+          exit 1
+
+      - name: Sync recent merged pull requests
+        if: ${{ github.event_name == 'schedule' }}
+        run: python3 .github/project-sync/project_sync.py --recent-hours 2 --write
+
+      - name: Process requested pull request
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.repository != '' && inputs.pr != 0 }}
+        shell: bash
+        run: |
+          args=(--repository "${{ inputs.repository }}" --pr "${{ inputs.pr }}")
+          if [[ "${{ inputs.write }}" == "true" ]]; then
+            args+=(--write)
+          fi
+          python3 .github/project-sync/project_sync.py "${args[@]}"
+
+      - name: Dry-run recent merged pull requests
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.repository == '' && inputs.pr == 0 }}
+        run: python3 .github/project-sync/project_sync.py --recent-hours 48
