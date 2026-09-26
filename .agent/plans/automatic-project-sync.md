@@ -23,7 +23,7 @@ A central scheduled/manual workflow discovers recently merged pull requests in b
 
 ## Security considerations
 
-Existing user-owned Projects cannot currently be managed by GitHub App, GitHub App user, installation, or fine-grained tokens through GitHub's Projects REST API. The workflow therefore supports a dedicated classic token stored only as an Actions secret. It must be limited to the scopes needed for private repository issue/PR access and user Project access. The workflow has read-only `GITHUB_TOKEN` permissions; writes use only the explicit secret and are gated by `BLUE_RIDGE_PROJECT_SYNC_ENABLED=true`.
+Existing user-owned Projects cannot currently be managed by GitHub App, GitHub App user, installation, or fine-grained tokens through GitHub's Projects REST API. The workflow therefore supports a dedicated classic token stored only as an Actions secret. It must be limited to the scopes needed for private repository issue/PR access and user Project access. The workflow has read-only `GITHUB_TOKEN` permissions; writes use only the explicit secret and are gated by the reviewed `.github/project-sync/activation.json` flag.
 
 ## Implementation milestones
 
@@ -44,7 +44,7 @@ Existing user-owned Projects cannot currently be managed by GitHub App, GitHub A
 
 ## Rollback considerations
 
-Set `BLUE_RIDGE_PROJECT_SYNC_ENABLED=false` (or remove it) to stop scheduled writes. The workflow does not delete Project items, issues, PRs, fields, Projects, or repositories. Removing the workflow and registry reverts automation without changing historical Project records.
+Set `.github/project-sync/activation.json` to `{"scheduled_writes_enabled": false}` (or remove it) to stop scheduled writes. The workflow does not delete Project items, issues, PRs, fields, Projects, or repositories. Removing the workflow and registry reverts automation without changing historical Project records.
 
 ## Decisions made during implementation
 
@@ -56,4 +56,4 @@ Set `BLUE_RIDGE_PROJECT_SYNC_ENABLED=false` (or remove it) to stop scheduled wri
 
 ## Final outcome
 
-The central registry, sync engine, tests, gated workflow, operating guide, and dated inventory are implemented. Live dry-runs covered both repository-owner scopes. A live organization-repository pilot created one Project item and its replay updated the same item; a personal-repository pilot updated an existing item. Both pilots assigned `owensreo` and set the configured terminal Status and merge date. Scheduled writes remain disabled pending protected PR review/landing and manual secret/variable configuration.
+The central registry, sync engine, tests, gated workflow, operating guide, and dated inventory are implemented. Live dry-runs covered both repository-owner scopes. A live organization-repository pilot created one Project item and its replay updated the same item; a personal-repository pilot updated an existing item. Both pilots assigned `owensreo` and set the configured terminal Status and merge date. The subsequent activation PR makes scheduled-write state a reviewed, versioned `activation.json` change rather than an out-of-band repository variable.
