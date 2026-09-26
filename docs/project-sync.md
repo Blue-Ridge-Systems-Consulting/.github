@@ -7,6 +7,12 @@ Blue Ridge Project Sync centrally maintains existing GitHub Projects v2 for merg
 
 Project ownership is independent of repository ownership. The live 2026-09-26 inventory found 31 open Projects owned by `owensreo` and no Projects owned by `Blue-Ridge-Systems-Consulting`; the registry therefore preserves the existing user-owned Projects and can support organization-owned destinations later without moving or recreating anything.
 
+## Live status
+
+Project Sync is deployed and enabled. Activation PR [#3](https://github.com/Blue-Ridge-Systems-Consulting/.github/pull/3) merged on 2026-09-26 and the tracked activation flag is `true` on `main`.
+
+The first authenticated write-mode Actions run, [36221849895](https://github.com/Blue-Ridge-Systems-Consulting/.github/actions/runs/36221849895), completed successfully. It processed the merged activation PR itself, routed `Blue-Ridge-Systems-Consulting/.github#3` to `owensreo` Project #24, Nexus Operations, assigned `owensreo`, set `Completed`, and recorded `2026-09-26` as the completion date. This confirms the deployed secret, cross-scope routing, native assignment, Project update, and date-update path.
+
 ## Lifecycle
 
 The central workflow polls recently merged pull requests from both scopes. It rejects open PRs and closed-unmerged PRs. For each merged PR it:
