@@ -1,6 +1,10 @@
 name: Blue Ridge Project Sync
 
 on:
+  pull_request:
+    paths:
+      - ".github/project-sync/**"
+      - ".github/workflows/project-sync.yml"
   schedule:
     - cron: "17,47 * * * *"
   workflow_dispatch:
@@ -27,6 +31,18 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  validate:
+    if: ${{ github.event_name == 'pull_request' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate Project Sync
+        run: |
+          python3 -m unittest discover -s .github/project-sync -p 'test_*.py'
+          python3 -m py_compile .github/project-sync/project_sync.py .github/project-sync/test_project_sync.py
+          python3 -m json.tool .github/project-sync/routes.json >/dev/null
+
   sync:
     if: ${{ github.event_name == 'workflow_dispatch' || vars.BLUE_RIDGE_PROJECT_SYNC_ENABLED == 'true' }}
     runs-on: ubuntu-latest
