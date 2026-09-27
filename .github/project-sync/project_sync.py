@@ -509,6 +509,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--pr", type=int, help="pull request number")
     parser.add_argument("--recent-hours", type=int, default=48)
     parser.add_argument("--write", action="store_true", help="apply writes; default is dry-run")
+    parser.add_argument(
+        "--allow-routing-review",
+        action="store_true",
+        help="report unclassified repositories without failing a batch run",
+    )
     return parser.parse_args()
 
 
@@ -538,7 +543,10 @@ def main() -> int:
                 "warnings": [str(error)],
             }
         print_report(result)
-        if result["result"] in {"error", "routing-review", "invalid-explicit-override"}:
+        failures_for_result = {"error", "routing-review", "invalid-explicit-override"}
+        if args.allow_routing_review:
+            failures_for_result.remove("routing-review")
+        if result["result"] in failures_for_result:
             failures += 1
     return 2 if failures else 0
 
