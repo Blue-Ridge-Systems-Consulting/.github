@@ -88,7 +88,7 @@ jobs:
 
       - name: Sync recent merged pull requests
         if: ${{ github.event_name == 'schedule' && steps.activation.outputs.scheduled_writes_enabled == 'true' }}
-        run: python3 .github/project-sync/project_sync.py --recent-hours 2 --write
+        run: python3 .github/project-sync/project_sync.py --recent-hours 2 --write --allow-routing-review
 
       - name: Process requested pull request
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.repository != '' && inputs.pr != 0 }}
