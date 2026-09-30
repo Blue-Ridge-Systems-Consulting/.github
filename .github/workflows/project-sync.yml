@@ -36,7 +36,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - name: Validate Project Sync
         run: |
           python3 -m unittest discover -s .github/project-sync -p 'test_*.py'
@@ -50,7 +50,7 @@ jobs:
     env:
       GH_TOKEN: ${{ secrets.BLUE_RIDGE_PROJECT_SYNC_TOKEN }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Read tracked activation flag
         id: activation
