@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "purpose": "Opt-in, read-only post-change checks. A declared check must use an already approved secure path; it must never restart, deploy, authenticate by bypass, or print secret values.",
+  "check_types": ["file", "command", "http", "tcp"],
+  "profiles": {
+    "nexus-preview-analytics": {"existing": ["loopback HTTP health check", "container HEALTHCHECK"], "source": "owensreo/nexus-preview-analytics/healthcheck-now.sh"},
+    "nexus-mcp": {"existing": ["routing and schema verification", "expected unauthenticated 401 boundary", "D1 health"], "source": "owensreo/blue-ridge-nexus-mcp/scripts/verify-production-routing.mjs"},
+    "vm-backups": {"existing": ["release/checksum/qemu image verification without host mutation"], "source": "owensreo/vm-backups/scripts/restore-vm.sh --verify-only"},
+    "tailscale-policy": {"planned": ["compare committed deployment plan with secure post-deploy Podman inventory"], "source": "owensreo/tailscale-policy deployment reports"}
+  },
+  "example": {
+    "id": "service-health",
+    "scope": "local",
+    "type": "http",
+    "url": "https://declared-safe-endpoint.example/health",
+    "expect_status": 200,
+    "expect_json_keys": ["status"],
+    "timeout_seconds": 10,
+    "retries": 2
+  }
+}

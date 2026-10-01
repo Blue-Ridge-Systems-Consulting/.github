@@ -1,0 +1,115 @@
+{
+  "schema_version": 1,
+  "last_evidence_review": "2026-10-01",
+  "scope": ["owensreo", "Blue-Ridge-Systems-Consulting"],
+  "evidence_rule": "Every relationship is backed by a repository file, workflow, or documented GitHub metadata. unknown means evidence was not available; it is not a negative assertion.",
+  "security": {
+    "do_not_store": ["credentials", "tokens", "private keys", "certificate material", "Tailscale state", "private endpoints", "runtime environment values"],
+    "do_not_assume": [
+      "A green deployment workflow proves a service is healthy.",
+      "A snapshot or report directory is desired state or is safe to remove.",
+      "Cloudflare, Tailscale, firewall, authentication, or DNS resources are fully represented by one repository.",
+      "Rootless Podman workloads, named volumes, or host-local SQLite data are reconstructable without separately documented data and secret recovery.",
+      "An archived or inactive repository has no live dependency."
+    ]
+  },
+  "services": [
+    {
+      "id": "tailscale-control-plane",
+      "source": "owensreo/tailscale-policy",
+      "configuration": ["policy.hujson", "tailscale-dns.json", "runner-fleet/runners.json"],
+      "network": ["Tailscale", "SSH through existing fleet runners"],
+      "persistent_data": "not tracked; tailnet identities and runtime state are external",
+      "recovery": "partial",
+      "evidence": ["README.md", "scripts/validate-tailscale-repo.py", "scripts/check-runner-fleet.py"]
+    },
+    {
+      "id": "nexus-container-x86",
+      "source": "owensreo/blue-ridge-nexus-containers",
+      "image": "GHCR images built from Containerfiles",
+      "configuration": ["deploy/quadlets", "Containerfiles"],
+      "runtime": "rootless Podman controlled through tailscale-policy publication/deployment workflows",
+      "persistent_data": "volumes and environment values intentionally external",
+      "recovery": "incomplete",
+      "evidence": ["README.md", "deploy/quadlets"]
+    },
+    {
+      "id": "nexus-container-arm",
+      "source": "owensreo/blue-ridge-nexus-arm-containers",
+      "image": "GHCR ARM images",
+      "configuration": ["Containerfiles", "new-nexus-arm service catalog"],
+      "runtime": "rootless Podman and user systemd",
+      "persistent_data": "SQLite and environment values are external to image source",
+      "recovery": "incomplete",
+      "evidence": ["README.md", "owensreo/new-nexus-arm/README.md"]
+    },
+    {
+      "id": "nexus-preview-analytics",
+      "source": "owensreo/nexus-preview-analytics",
+      "image": "Containerfile",
+      "configuration": ["systemd/nexus-preview-analytics.service"],
+      "runtime": "rootless Podman with user systemd",
+      "persistent_data": "host-local SQLite",
+      "network": "loopback health endpoint; repository documents no Tunnel route",
+      "recovery": "service-only",
+      "evidence": ["README.md", "healthcheck-now.sh", "Containerfile"]
+    },
+    {
+      "id": "nexus-hub",
+      "source": "owensreo/blue-ridge-cloudflare-os/packages/nexus-hub",
+      "configuration": ["wrangler configuration", "migrations"],
+      "persistent_data": "Cloudflare D1",
+      "network": "protected Cloudflare ingestion and read APIs",
+      "recovery": "unknown",
+      "evidence": ["README.md", "packages/nexus-hub"]
+    },
+    {
+      "id": "nexus-mcp",
+      "source": "owensreo/blue-ridge-nexus-mcp",
+      "configuration": ["Worker deployment configuration"],
+      "persistent_data": "D1 telemetry and OAuth KV state",
+      "network": "Cloudflare Worker authentication boundary",
+      "recovery": "service-only",
+      "evidence": ["docs/TELEMETRY-RECOVERY.md", "docs/DEPLOYMENT.md"]
+    },
+    {
+      "id": "cloudflare-zero-trust",
+      "source": "owensreo/cloudflare-zero-trust-policy",
+      "configuration": ["Terraform"],
+      "persistent_data": "remote Terraform state backup",
+      "network": "Cloudflare DNS, Access, routes, tunnels, load-balancer resources",
+      "recovery": "partial; dashboard-managed and manual tunnel resources remain outside Terraform",
+      "evidence": ["README.md", ".github/workflows/terraform-apply.yml"]
+    },
+    {
+      "id": "vm-backups",
+      "source": "owensreo/vm-backups",
+      "configuration": ["scripts", "libvirt XML", "manifests", "checksums"],
+      "persistent_data": "compressed qcow2 assets in private GitHub Releases and host payload repositories",
+      "network": "compatible libvirt host and required VM interface source",
+      "recovery": "documented; non-destructive --verify-only exists",
+      "evidence": ["README.md", "scripts/restore-vm.sh"]
+    },
+    {
+      "id": "project-sync",
+      "source": "Blue-Ridge-Systems-Consulting/.github",
+      "configuration": [".github/project-sync/routes.json", ".github/project-sync/activation.json"],
+      "runtime": "GitHub Actions",
+      "persistent_data": "GitHub Projects state",
+      "recovery": "partial; requires separately managed GitHub authentication",
+      "evidence": ["docs/project-sync.md", ".github/workflows/project-sync.yml"]
+    }
+  ],
+  "lifecycle": {
+    "active": ["owensreo/tailscale-policy", "owensreo/blue-ridge-cloudflare-os", "owensreo/cloudflare-zero-trust-policy", "owensreo/blue-ridge-nexus-mcp", "owensreo/blue-ridge-nexus-containers", "owensreo/blue-ridge-nexus-arm-containers", "owensreo/new-nexus-arm", "owensreo/new-nexus-firebat", "owensreo/blue-ridge-frappe", "owensreo/blue-ridge-sign", "owensreo/blue-ridge-signing-ops", "owensreo/nexus-preview-analytics", "owensreo/vm-backups", "owensreo/staging-host-vm-backups", "owensreo/blue-ridge-nexus-pi", "owensreo/cloudflare-policy-dashboard", "owensreo/blue-ridge-r2-backup-dashboard", "owensreo/blue-ridge-tailscale-dashboard", "owensreo/isp-analytics", "owensreo/nexus-live-isp-7q4m2x", "owensreo/northstar-guard", "owensreo/blue-ridge-windows-maintenance", "owensreo/maintenance-scripts", "owensreo/netgear-router-configs", "owensreo/Linux-Scripts", "owensreo/MacOS-Scripts", "owensreo/Windows-Powershell", "Blue-Ridge-Systems-Consulting/blue-ridge-container-images", "Blue-Ridge-Systems-Consulting/northstar-guard", "Blue-Ridge-Systems-Consulting/northstar-guard-public", "Blue-Ridge-Systems-Consulting/raspberry-pi-5"],
+    "maintenance": ["owensreo/vm-backup-nexus-pi", "owensreo/vm-backup-system-host-1", "owensreo/vm-backup-system-host-2", "owensreo/september-2026-nexus-arm", "owensreo/september-2026-nexus-firebats", "owensreo/september-2026-nexus-laptop", "owensreo/Playboook", "owensreo/awesome-mac", "owensreo/chatgpt-scripts", "owensreo/chatgpt-codex", "owensreo/owensreo", "owensreo/ray-owens-resume", "owensreo/rayowens-redirect-page", "owensreo/owensreo.github.io", "owensreo/tailscale-interactive-dashboard", "Blue-Ridge-Systems-Consulting/.github"],
+    "experimental": ["owensreo/career-ops", "owensreo/markitdown", "owensreo/free-llm-api-resources", "owensreo/blue-ridge-nexus-firebat", "owensreo/blue-ridge-nexus-central-dashboard"],
+    "superseded_retained_history": ["owensreo/blue-ridge-book-page", "owensreo/blue-ridge-intro-call", "owensreo/blue-ridge-main-site-page", "owensreo/blue-ridge-mcp-site", "owensreo/blue-ridge-nexus-central-login-page", "owensreo/blue-ridge-nexus-site-page", "owensreo/blue-ridge-systems-signing", "owensreo/blue-ridge-translate", "owensreo/blue-ridge-writing", "owensreo/blueridgesystems-site", "Blue-Ridge-Systems-Consulting/blueridgesystems-site", "Blue-Ridge-Systems-Consulting/blue-ridge-book-page", "Blue-Ridge-Systems-Consulting/blue-ridge-intro-call", "Blue-Ridge-Systems-Consulting/blue-ridge-main-site-page", "Blue-Ridge-Systems-Consulting/blue-ridge-mcp-site", "Blue-Ridge-Systems-Consulting/blue-ridge-nexus-site-page", "Blue-Ridge-Systems-Consulting/blue-ridge-translate", "Blue-Ridge-Systems-Consulting/blue-ridge-writing"],
+    "unknown": ["owensreo/raspberry-pi-5", "Blue-Ridge-Systems-Consulting/blue-ridge-nexus-central-login-page", "Blue-Ridge-Systems-Consulting/blue-ridge-windows-maintenance", "Blue-Ridge-Systems-Consulting/MacOS-Scripts"]
+  },
+  "drift_rules": {
+    "expected_or_benign": ["reports/", "snapshots/", "container-backup/", "*.bak*", "runtime container IDs", "start timestamps", "metrics", "workflow artifacts"],
+    "compare_desired_state_only": ["terraform/", "deploy/", "systemd/", "config/", "Containerfile*", ".github/workflows"],
+    "security_relevant": ["Cloudflare Access and tunnel configuration", "Tailscale ACL and DNS behavior", "authentication boundaries", "published ports", "runtime permissions", "credentials"]
+  }
+}

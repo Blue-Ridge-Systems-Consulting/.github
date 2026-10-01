@@ -1,0 +1,15 @@
+{
+  "checks": [
+    {
+      "id": "architecture-inventory-present",
+      "type": "file",
+      "path": "config/blue-ridge-architecture.json"
+    },
+    {
+      "id": "architecture-inventory-valid",
+      "type": "command",
+      "argv": ["python3", "scripts/validate_architecture_inventory.py"],
+      "timeout_seconds": 30
+    }
+  ]
+}
