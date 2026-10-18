@@ -272,20 +272,39 @@ def completed_field_updates(
     return updates, warnings
 
 
-def fetch_recent_prs(client: GitHub, owners: list[str], since: dt.datetime) -> list[dict[str, Any]]:
+def configured_repositories(registry: dict[str, Any]) -> list[str]:
+    return sorted(
+        {
+            repository
+            for project in registry.get("projects", [])
+            for repository in project.get("repositories", [])
+        }
+    )
+
+
+def fetch_recent_prs(
+    client: GitHub, registry: dict[str, Any], since: dt.datetime
+) -> tuple[list[dict[str, Any]], list[str]]:
     found: dict[str, dict[str, Any]] = {}
-    date = since.date().isoformat()
-    for owner in owners:
-        qualifier = f"org:{owner}" if owner == "Blue-Ridge-Systems-Consulting" else f"user:{owner}"
-        query = f"is:pr is:merged {qualifier} merged:>={date}"
-        result = client.api(f"search/issues?q={query.replace(' ', '+')}&per_page=100")
-        for item in result.get("items", []):
-            repo = item["repository_url"].removeprefix("https://api.github.com/repos/")
-            pr = client.api(f"repos/{repo}/pulls/{item['number']}")
+    warnings: list[str] = []
+    for repository in configured_repositories(registry):
+        try:
+            pull_requests = client.api(
+                f"repos/{repository}/pulls?state=closed&sort=updated&direction=desc&per_page=100"
+            )
+        except ApiError as error:
+            if "HTTP 404" not in str(error):
+                raise
+            warnings.append(f"Skipped unavailable repository {repository}: {error}")
+            continue
+        for pr in pull_requests:
+            merged_at = pr.get("merged_at")
+            if not merged_at or dt.datetime.fromisoformat(merged_at.replace("Z", "+00:00")) < since:
+                continue
+            repo = repository
             pr["repository_url"] = f"https://api.github.com/repos/{repo}"
-            if pr.get("merged_at") and dt.datetime.fromisoformat(pr["merged_at"].replace("Z", "+00:00")) >= since:
-                found[pr["html_url"]] = pr
-    return sorted(found.values(), key=lambda pr: pr["merged_at"])
+            found[pr["html_url"]] = pr
+    return sorted(found.values(), key=lambda pr: pr["merged_at"]), warnings
 
 
 def fetch_pr(client: GitHub, repository: str, number: int) -> dict[str, Any]:
@@ -527,7 +546,9 @@ def main() -> int:
         prs = [fetch_pr(client, args.repository, args.pr)]
     else:
         since = dt.datetime.now(dt.timezone.utc) - dt.timedelta(hours=args.recent_hours)
-        prs = fetch_recent_prs(client, registry["repository_owners"], since)
+        prs, fetch_warnings = fetch_recent_prs(client, registry, since)
+        for warning in fetch_warnings:
+            print(f"Warning: {warning}")
     if not prs:
         print("No eligible merged pull requests found.")
         return 0

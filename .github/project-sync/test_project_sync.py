@@ -99,5 +99,35 @@ class IdempotencyTests(unittest.TestCase):
         self.assertIsNone(SYNC.find_existing_item(items, pull, []))
 
 
+class FetchTests(unittest.TestCase):
+    def test_fetch_uses_configured_repositories_and_skips_missing_results(self):
+        class FakeClient:
+            def __init__(self):
+                self.paths = []
+
+            def api(self, path, **kwargs):
+                self.paths.append(path)
+                if path == "repos/Blue-Ridge-Systems-Consulting/.github/pulls?state=closed&sort=updated&direction=desc&per_page=100":
+                    raise SYNC.ApiError("GitHub API GET ... failed: HTTP 404")
+                if path == "repos/owensreo/cloudflare-zero-trust-policy/pulls?state=closed&sort=updated&direction=desc&per_page=100":
+                    return [
+                        {
+                            "number": 9,
+                            "merged_at": "2026-10-18T05:00:00Z",
+                            "html_url": "https://github.com/owensreo/cloudflare-zero-trust-policy/pull/9",
+                        }
+                    ]
+                raise AssertionError(f"unexpected API path: {path}")
+
+        client = FakeClient()
+        since = SYNC.dt.datetime(2026, 10, 18, 4, tzinfo=SYNC.dt.timezone.utc)
+        pulls, warnings = SYNC.fetch_recent_prs(client, registry(), since)
+
+        self.assertEqual([pull["number"] for pull in pulls], [9])
+        self.assertEqual(len(warnings), 1)
+        self.assertTrue(any("repos/Blue-Ridge-Systems-Consulting/.github/pulls?" in path for path in client.paths))
+        self.assertTrue(any("repos/owensreo/cloudflare-zero-trust-policy/pulls?" in path for path in client.paths))
+
+
 if __name__ == "__main__":
     unittest.main()

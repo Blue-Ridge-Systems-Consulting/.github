@@ -48,7 +48,7 @@ Writes are fail-closed behind both controls:
 
 Manual dispatch defaults to dry-run. Keep the activation file absent or set its value to `false` while reviewing dry-run routing. Then select one merged PR, dispatch with `write=true`, verify the assignment/status/date, and dispatch the same PR again to prove `update-existing` instead of duplicate creation. Enabling or disabling scheduled writes is a normal reviewed PR change.
 
-The schedule runs at minutes 17 and 47 and searches the prior two hours, intentionally overlapping runs. Idempotent lookup makes overlap safe and covers delayed workflow starts.
+The schedule runs at minutes 17 and 47 and searches the prior 24 hours. The wider reconciliation window is intentional: GitHub may delay scheduled workflow starts, and idempotent lookup makes repeated scans safe. An unavailable configured repository is recorded as a warning and does not abort the rest of the batch.
 
 ## Local validation
 
