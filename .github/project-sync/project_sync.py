@@ -302,8 +302,7 @@ def fetch_recent_prs(
     for repository in configured_repositories(registry):
         try:
             pull_requests = client.api(
-                f"repos/{repository}/pulls?state=closed&sort=updated&direction=desc&per_page=100",
-                paginate=True,
+                f"repos/{repository}/pulls?state=closed&sort=updated&direction=desc&per_page=100"
             )
         except ApiError as error:
             if "HTTP 404" not in str(error):
