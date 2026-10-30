@@ -45,7 +45,8 @@
         "owensreo/blue-ridge-main-site-page",
         "Blue-Ridge-Systems-Consulting/blue-ridge-main-site-page",
         "owensreo/blueridgesystems-site",
-        "Blue-Ridge-Systems-Consulting/blueridgesystems-site"
+        "Blue-Ridge-Systems-Consulting/blueridgesystems-site",
+        "owensreo/blue-ridge-translate"
       ],
       "labels": ["website", "main-site", "branding"],
       "keywords": ["main site", "blue ridge systems consulting", "blueridgesystems.us"],
@@ -214,7 +215,9 @@
         "owensreo/blue-ridge-nexus-containers",
         "owensreo/september-2026-nexus-arm",
         "owensreo/september-2026-nexus-firebats",
-        "owensreo/free-llm-api-resources"
+        "owensreo/free-llm-api-resources",
+        "owensreo/AIClient2API",
+        "owensreo/blue-ridge-nexus-firebat"
       ],
       "labels": ["intelligence", "ai", "offline-ai", "vectorize"],
       "keywords": ["nexus intelligence", "offline ai", "vector memory", "model profile"],
@@ -306,7 +309,7 @@
       "owner_type": "user",
       "number": 23,
       "title": "Nexus ARM",
-      "repositories": ["owensreo/blue-ridge-nexus-arm-containers", "owensreo/new-nexus-arm", "owensreo/blue-ridge-nexus-pi"],
+      "repositories": ["owensreo/blue-ridge-nexus-arm-containers", "owensreo/new-nexus-arm", "owensreo/blue-ridge-nexus-pi", "owensreo/new-nexus-firebat", "owensreo/vm-backup-nexus-pi"],
       "labels": ["nexus-arm", "arm64"],
       "keywords": ["nexus arm", "arm64"],
       "paths": [],
@@ -336,7 +339,17 @@
         "owensreo/northstar-guard",
         "owensreo/raspberry-pi-5",
         "owensreo/september-2026-nexus-laptop",
-        "owensreo/vm-backups"
+        "owensreo/vm-backups",
+        "owensreo/chatgpt-scripts",
+        "owensreo/career-ops",
+        "owensreo/awesome-mac",
+        "owensreo/Windows-Powershell",
+        "owensreo/markitdown",
+        "owensreo/codex",
+        "owensreo/vm-backup-system-host-1",
+        "owensreo/vm-backup-system-host-2",
+        "owensreo/Playboook",
+        "owensreo/chatgpt-codex"
       ],
       "labels": ["operations", "northstar", "maintenance", "project-sync"],
       "keywords": ["nexus operations", "northstar", "fleet", "project sync", "maintenance"],
