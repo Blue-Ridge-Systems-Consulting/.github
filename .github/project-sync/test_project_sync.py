@@ -97,6 +97,11 @@ class RoutingTests(unittest.TestCase):
         self.assertIsNone(result.project)
         self.assertEqual(set(result.candidates), {"cloudflare", "operations"})
 
+    def test_container_repository_is_configured_for_fanout(self):
+        data = registry()
+        data["fanout_repositories"] = ["owensreo/blue-ridge-nexus-containers"]
+        self.assertIn("owensreo/blue-ridge-nexus-containers", data["fanout_repositories"])
+
 
 class IdempotencyTests(unittest.TestCase):
     def test_existing_pr_node_is_reused(self):

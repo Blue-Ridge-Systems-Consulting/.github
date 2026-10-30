@@ -430,6 +430,30 @@ def process_pr(client: GitHub, registry: dict[str, Any], pr: dict[str, Any], dry
         changed_paths=paths,
     )
     if not route.project:
+        if (
+            route.signal == "routing-review"
+            and repository in registry.get("fanout_repositories", [])
+            and route.candidates
+        ):
+            by_key = {project["key"]: project for project in registry["projects"]}
+            children = []
+            for key in route.candidates:
+                project = by_key.get(key)
+                if not project:
+                    continue
+                child_registry = dict(registry)
+                child_registry["projects"] = [project]
+                child_registry["fanout_repositories"] = []
+                children.append(process_pr(client, child_registry, pr, dry_run))
+            return {
+                "result": "fanout",
+                "repository": repository,
+                "repository_owner": repository_owner,
+                "pr": pr["html_url"],
+                "merge_date": pr["merged_at"],
+                "candidates": list(route.candidates),
+                "children": children,
+            }
         return {
             "result": route.signal,
             "repository": repository,
@@ -513,6 +537,10 @@ def process_pr(client: GitHub, registry: dict[str, Any], pr: dict[str, Any], dry
 
 
 def print_report(result: dict[str, Any]) -> None:
+    if result.get("result") == "fanout":
+        for child in result.get("children", []):
+            print_report(child)
+        return
     print("BLUE RIDGE PROJECT SYNC")
     for label, key in (
         ("Repository", "repository"),
@@ -584,7 +612,8 @@ def main() -> int:
         failures_for_result = {"error", "routing-review", "invalid-explicit-override"}
         if args.allow_routing_review:
             failures_for_result.remove("routing-review")
-        if result["result"] in failures_for_result:
+        leaf_results = result.get("children", [result])
+        if any(child["result"] in failures_for_result for child in leaf_results):
             failures += 1
     return 2 if failures else 0
 
