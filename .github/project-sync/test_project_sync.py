@@ -124,6 +124,18 @@ class IdempotencyTests(unittest.TestCase):
 
 
 class FetchTests(unittest.TestCase):
+    def test_archived_repositories_are_not_scanned(self):
+        class ArchivedClient:
+            def api(self, path, **kwargs):
+                if path.count("/") != 2:
+                    raise AssertionError("Archived PRs must not be scanned")
+                return {"archived": True}
+        since = SYNC.dt.datetime(2026, 10, 18, tzinfo=SYNC.dt.timezone.utc)
+        pulls, warnings = SYNC.fetch_recent_prs(ArchivedClient(), registry(), since)
+        self.assertEqual(pulls, [])
+        self.assertEqual(len(warnings), 2)
+        self.assertTrue(all("Skipped archived repository" in w for w in warnings))
+
     def test_fetch_uses_configured_repositories_and_skips_missing_results(self):
         class FakeClient:
             def __init__(self):
@@ -131,6 +143,8 @@ class FetchTests(unittest.TestCase):
 
             def api(self, path, **kwargs):
                 self.paths.append(path)
+                if path.count("/") == 2:
+                    return {"archived": False}
                 if path == "repos/Blue-Ridge-Systems-Consulting/.github/pulls?state=closed&sort=updated&direction=desc&per_page=100":
                     raise SYNC.ApiError("GitHub API GET ... failed: HTTP 404")
                 if path == "repos/owensreo/cloudflare-zero-trust-policy/pulls?state=closed&sort=updated&direction=desc&per_page=100":

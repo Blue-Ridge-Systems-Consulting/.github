@@ -301,6 +301,10 @@ def fetch_recent_prs(
     warnings: list[str] = []
     for repository in configured_repositories(registry):
         try:
+            metadata = client.api(f"repos/{repository}")
+            if metadata.get("archived"):
+                warnings.append(f"Skipped archived repository {repository}; preserving read-only lifecycle")
+                continue
             pull_requests = client.api(
                 f"repos/{repository}/pulls?state=closed&sort=updated&direction=desc&per_page=100"
             )
