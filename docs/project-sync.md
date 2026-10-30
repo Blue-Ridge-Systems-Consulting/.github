@@ -48,7 +48,7 @@ Writes are fail-closed behind both controls:
 
 Manual dispatch defaults to dry-run. Keep the activation file absent or set its value to `false` while reviewing dry-run routing. Then select one merged PR, dispatch with `write=true`, verify the assignment/status/date, and dispatch the same PR again to prove `update-existing` instead of duplicate creation. Enabling or disabling scheduled writes is a normal reviewed PR change.
 
-The schedule runs at minutes 17 and 47 and searches the prior 24 hours. The wider reconciliation window is intentional: GitHub may delay scheduled workflow starts, and idempotent lookup makes repeated scans safe. An unavailable configured repository is recorded as a warning and does not abort the rest of the batch.
+The schedule runs at minutes 17 and 47 and searches the prior 24 hours. The job has a 30-minute bound and caches Project item and field reads within each batch. Item writes invalidate only the destination item cache; consistency retries refresh the inventory. Title-only matching is limited to draft cards, so distinct PRs with identical titles keep separate records. The wider reconciliation window is intentional: GitHub may delay scheduled workflow starts, and idempotent lookup makes repeated scans safe. An unavailable configured repository is recorded as a warning and does not abort the rest of the batch.
 
 ## Local validation
 
@@ -68,3 +68,5 @@ Omit `--write` for every dry-run. A write requires explicit `--write` and approp
 - Projects 31 and 32 represent `lawyerdr-bit/DL`, outside the two requested repository-owner scopes, and are excluded.
 - Repositories without a confident route are reported for routing review.
 - A Project without a configured existing date field still receives assignment and Status during a write, but reports the missing date field for schema review; the engine does not create redundant fields automatically.
+
+For a bounded catch-up, dispatch with no repository/PR, select `recent_hours` (1–168), and leave `write=false` first to inspect routing. After review, the same inputs with `write=true` use the existing activation and token gates. Ambiguous routes remain reported for routing review. Repositories outside the registry still require a confident destination mapping.

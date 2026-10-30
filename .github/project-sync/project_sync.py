@@ -33,6 +33,7 @@ class ApiError(RuntimeError):
 class GitHub:
     def __init__(self, token: str | None = None) -> None:
         self.env = os.environ.copy()
+        self.project_cache: dict[str, Any] = {}
         if token:
             self.env["GH_TOKEN"] = token
 
@@ -44,6 +45,12 @@ class GitHub:
         body: dict[str, Any] | None = None,
         paginate: bool = False,
     ) -> Any:
+        project_read = "/projectsV2/" in path and ("/items?" in path or "/fields?" in path)
+        if method == "GET" and project_read and path in self.project_cache:
+            return self.project_cache[path]
+        if method != "GET" and "/projectsV2/" in path and "/items" in path:
+            prefix = path.split("/items", 1)[0] + "/items?"
+            self.project_cache = {k: v for k, v in self.project_cache.items() if not k.startswith(prefix)}
         command = [
             "gh",
             "api",
@@ -80,7 +87,10 @@ class GitHub:
                 pages.append(value)
                 text = text[index:].lstrip()
             if all(isinstance(page, list) for page in pages):
-                return [item for page in pages for item in page]
+                result = [item for page in pages for item in page]
+                if project_read:
+                    self.project_cache[path] = result
+                return result
             return pages
         return json.loads(completed.stdout)
 
@@ -232,7 +242,9 @@ def find_existing_item(
             return item
     title = normalize(pr.get("title"))
     title_matches = [
-        item for item in items if normalize((item.get("content") or {}).get("title")) == title
+        item for item in items
+        if item.get("content_type") == "DraftIssue"
+        and normalize((item.get("content") or {}).get("title")) == title
     ]
     return title_matches[0] if len(title_matches) == 1 else None
 
@@ -290,7 +302,8 @@ def fetch_recent_prs(
     for repository in configured_repositories(registry):
         try:
             pull_requests = client.api(
-                f"repos/{repository}/pulls?state=closed&sort=updated&direction=desc&per_page=100"
+                f"repos/{repository}/pulls?state=closed&sort=updated&direction=desc&per_page=100",
+                paginate=True,
             )
         except ApiError as error:
             if "HTTP 404" not in str(error):
@@ -357,6 +370,7 @@ def recover_eventually_consistent_item(
 ) -> dict[str, Any] | None:
     for delay in (1, 2, 4, 8, 16):
         time.sleep(delay)
+        client.project_cache.clear()
         items = client.api(f"{project_base(project)}/items?per_page=100", paginate=True)
         existing = find_existing_item(items, pr, linked_issues)
         if existing:
