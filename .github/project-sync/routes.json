@@ -5,6 +5,7 @@
     "Blue-Ridge-Systems-Consulting"
   ],
   "assignee": "owensreo",
+  "fanout_repositories": ["owensreo/blue-ridge-nexus-containers"],
   "projects": [
     {
       "key": "nexus-container-lifecycle",
