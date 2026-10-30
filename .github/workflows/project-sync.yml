@@ -17,6 +17,11 @@ on:
         description: "Optional merged pull request number"
         required: false
         type: number
+      recent_hours:
+        description: "Reconciliation lookback in hours (1-168)"
+        required: true
+        default: 48
+        type: number
       write:
         description: "Apply writes (requires the tracked activation flag and secret)"
         required: true
@@ -46,7 +51,7 @@ jobs:
 
   sync:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
     env:
       GH_TOKEN: ${{ secrets.BLUE_RIDGE_PROJECT_SYNC_TOKEN }}
     steps:
@@ -100,6 +105,17 @@ jobs:
           fi
           python3 .github/project-sync/project_sync.py "${args[@]}"
 
-      - name: Dry-run recent merged pull requests
+      - name: Reconcile recent merged pull requests
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.repository == '' && inputs.pr == 0 }}
-        run: python3 .github/project-sync/project_sync.py --recent-hours 48
+        env:
+          RECENT_HOURS: ${{ inputs.recent_hours }}
+          APPLY_WRITES: ${{ inputs.write }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$RECENT_HOURS" =~ ^[0-9]+$ ]] && (( RECENT_HOURS >= 1 && RECENT_HOURS <= 168 ))
+          args=(--recent-hours "$RECENT_HOURS" --allow-routing-review)
+          if [[ "$APPLY_WRITES" == "true" ]]; then
+            args+=(--write)
+          fi
+          python3 .github/project-sync/project_sync.py "${args[@]}"

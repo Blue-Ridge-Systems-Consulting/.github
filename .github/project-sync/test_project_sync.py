@@ -2,6 +2,8 @@
 import importlib.util
 import sys
 import unittest
+from unittest.mock import patch
+import subprocess
 from pathlib import Path
 
 
@@ -49,6 +51,23 @@ def pr(repo="Blue-Ridge-Systems-Consulting/.github", body="", labels=None):
     }
 
 
+class ProjectCacheTests(unittest.TestCase):
+    def test_project_reads_reused_until_destination_mutates(self):
+        client = SYNC.GitHub()
+        a = "users/owensreo/projectsV2/3/items?per_page=100"
+        b = "users/owensreo/projectsV2/4/items?per_page=100"
+        reply = subprocess.CompletedProcess([], 0, stdout="[]", stderr="")
+        with patch.object(SYNC.subprocess, "run", return_value=reply) as run:
+            client.api(a, paginate=True)
+            client.api(b, paginate=True)
+            client.api(a, paginate=True)
+            self.assertEqual(run.call_count, 2)
+            client.api("users/owensreo/projectsV2/3/items", method="POST", body={})
+            client.api(b, paginate=True)
+            client.api(a, paginate=True)
+            self.assertEqual(run.call_count, 4)
+
+
 class RoutingTests(unittest.TestCase):
     def test_existing_membership_wins(self):
         result = SYNC.route_pr(pr(), registry(), membership_projects=[("owensreo", 30)])
@@ -87,14 +106,19 @@ class IdempotencyTests(unittest.TestCase):
 
     def test_unique_title_fallback_is_reused(self):
         pull = {"node_id": "PR_node", "html_url": "https://github.com/o/r/pull/1", "title": "Work"}
-        items = [{"node_id": "ITEM", "content": {"node_id": "OTHER", "title": " work "}}]
+        items = [{"node_id": "ITEM", "content_type": "DraftIssue", "content": {"node_id": "OTHER", "title": " work "}}]
         self.assertEqual(SYNC.find_existing_item(items, pull, []), items[0])
+
+    def test_same_title_other_pull_request_is_not_reused(self):
+        pull = {"node_id": "PR_A", "html_url": "https://github.com/o/a/pull/1", "title": "Brand README"}
+        items = [{"content_type": "PullRequest", "content": {"node_id": "PR_B", "title": "Brand README"}}]
+        self.assertIsNone(SYNC.find_existing_item(items, pull, []))
 
     def test_duplicate_titles_are_not_guessed(self):
         pull = {"node_id": "PR_node", "html_url": "https://github.com/o/r/pull/1", "title": "Work"}
         items = [
-            {"node_id": "A", "content": {"node_id": "A1", "title": "Work"}},
-            {"node_id": "B", "content": {"node_id": "B1", "title": "Work"}},
+            {"node_id": "A", "content_type": "DraftIssue", "content": {"node_id": "A1", "title": "Work"}},
+            {"node_id": "B", "content_type": "DraftIssue", "content": {"node_id": "B1", "title": "Work"}},
         ]
         self.assertIsNone(SYNC.find_existing_item(items, pull, []))
 
