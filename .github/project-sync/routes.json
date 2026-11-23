@@ -143,7 +143,10 @@
       "owner_type": "user",
       "number": 12,
       "title": "Ray Owens Resume",
-      "repositories": ["owensreo/ray-owens-resume"],
+      "repositories": [
+        "owensreo/ray-owens-resume",
+        "Blue-Ridge-Systems-Consulting/ray-owens-resume"
+      ],
       "labels": ["resume"],
       "keywords": ["resume.blueridgesystems.us", "resume portfolio"],
       "paths": [],
@@ -258,7 +261,10 @@
       "owner_type": "user",
       "number": 9,
       "title": "Nexus Central",
-      "repositories": ["owensreo/blue-ridge-nexus-containers"],
+      "repositories": [
+        "owensreo/blue-ridge-nexus-containers",
+        "owensreo/blue-ridge-nexus-app"
+      ],
       "labels": ["nexus-central"],
       "keywords": ["nexus central service", "port 8799"],
       "paths": ["services/nexus-central/", "nexus-central/"],
@@ -271,7 +277,10 @@
       "owner_type": "user",
       "number": 20,
       "title": "Blue Ridge AI Chat",
-      "repositories": ["owensreo/blue-ridge-nexus-containers"],
+      "repositories": [
+        "owensreo/blue-ridge-nexus-containers",
+        "Blue-Ridge-Systems-Consulting/blue-ridge-ai"
+      ],
       "labels": ["ai-chat"],
       "keywords": ["blue ridge ai chat"],
       "paths": ["services/ai-chat/", "ai-chat/"],
@@ -350,7 +359,8 @@
         "owensreo/vm-backup-system-host-1",
         "owensreo/vm-backup-system-host-2",
         "owensreo/Playboook",
-        "owensreo/chatgpt-codex"
+        "owensreo/chatgpt-codex",
+        "owensreo/blue-ridge-os-mac"
       ],
       "labels": ["operations", "northstar", "maintenance", "project-sync"],
       "keywords": ["nexus operations", "northstar", "fleet", "project sync", "maintenance"],
@@ -390,7 +400,10 @@
       "owner_type": "user",
       "number": 27,
       "title": "Website Analytics",
-      "repositories": ["owensreo/blue-ridge-nexus-containers"],
+      "repositories": [
+        "owensreo/blue-ridge-nexus-containers",
+        "Blue-Ridge-Systems-Consulting/blue-ridge-analytics"
+      ],
       "labels": ["website-analytics", "web-vitals"],
       "keywords": ["website analytics", "web vitals"],
       "paths": ["services/website-analytics/", "web-vitals/"],

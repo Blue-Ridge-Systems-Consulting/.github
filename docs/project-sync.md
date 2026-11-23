@@ -15,7 +15,7 @@ The first authenticated write-mode Actions run, [36221849895](https://github.com
 
 ## Lifecycle
 
-The central workflow polls recently merged pull requests from both scopes. It rejects open PRs and closed-unmerged PRs. For each merged PR it:
+The central workflow polls recently merged pull requests from repositories listed in the routing registry. Add each new repository to the best-fit Project in the registry to include it in scheduled scans. It rejects open PRs and closed-unmerged PRs. For each merged PR it:
 
 1. Searches configured destination Projects for the PR and linked issues.
 2. Routes by existing membership, explicit override, exact `OWNER/REPOSITORY`, linked-issue membership, labels, changed paths, then title/body keywords.
@@ -27,6 +27,22 @@ The central workflow polls recently merged pull requests from both scopes. It re
 8. Writes the actual merge date to the first matching existing configured date field.
 
 The registry is `.github/project-sync/routes.json`. It stores stable owner, project number, titles, repository mappings, routing signals, and field/option names. Live numeric/node IDs are discovered on every run.
+
+### November 2026 repository onboarding
+
+Five recently created repositories were missing from scheduled discovery. The routing update adds each to an existing Project.
+
+| Project | Repository |
+| --- | --- |
+| Nexus Central #9 | `owensreo/blue-ridge-nexus-app` |
+| Ray Owens Resume #12 | `Blue-Ridge-Systems-Consulting/ray-owens-resume` |
+| Blue Ridge AI Chat #20 | `Blue-Ridge-Systems-Consulting/blue-ridge-ai` |
+| Nexus Operations #24 | `owensreo/blue-ridge-os-mac` |
+| Website Analytics #27 | `Blue-Ridge-Systems-Consulting/blue-ridge-analytics` |
+
+All 13 Project Sync tests passed. Local dry runs using four real merged PRs confirmed their destinations. The resume repository had no merged PR, so its route was checked directly. Dry runs for Nexus Central and Blue Ridge AI Chat reported no configured matching completion-date field.
+
+Scheduled coverage begins after the routing change lands on `main`. At validation time, 35 previously merged PRs were outside the 24-hour scheduled window and would require a separate reconciliation.
 
 ## Authentication
 
